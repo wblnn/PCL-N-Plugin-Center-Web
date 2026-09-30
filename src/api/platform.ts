@@ -261,7 +261,7 @@ export const platform = {
       console.info(`[test] 已模拟 ${provider} ${mode === 'link' ? '关联' : '登录'}，未离开页面。`);
       return;
     }
-    const target = new URL(`/auth/v1/oauth/${provider}/start`, AUTH_BASE);
+    const target = new URL(`/auth/v1/oauth/${provider}/start`, AUTH_BASE || window.location.origin);
     target.searchParams.set('return_to', returnTo);
     target.searchParams.set('mode', mode);
     target.searchParams.set('scope', 'console');

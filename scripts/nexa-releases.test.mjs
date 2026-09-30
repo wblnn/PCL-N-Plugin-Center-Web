@@ -28,7 +28,7 @@ test('live releases revalidate, coalesce requests, isolate snapshots and respect
   t.mock.method(Date, 'now', () => now);
   t.mock.method(globalThis, 'fetch', async url => {
     calls++;
-    if (String(url).startsWith('https://api.github.com/')) {
+    if (String(url) === '/api/v1/github/releases' || String(url).startsWith('https://api.github.com/')) {
       if (offline) return new Response('', {status: 503});
       return Response.json([makeRelease(), {...makeRelease(), draft:true, tag_name:'2.0.0.alpha.1000'}]);
     }
@@ -41,6 +41,7 @@ test('live releases revalidate, coalesce requests, isolate snapshots and respect
   assert.equal((await loadNexaCatalog()).releases[0].tag_name,tag); assert.equal(calls,2);
   now += 61000; offline = true;
   const fallback = await loadNexaCatalog(); assert.equal(fallback.source,'snapshot'); assert.equal(fallback.releases[0].body,'Saved notes');
+  assert.equal(calls, 5); // 代理失败后尝试 GitHub，再读取静态快照。
   const controller = new AbortController(); controller.abort(); const previous = calls;
   await assert.rejects(loadNexaCatalog(controller.signal), {name:'AbortError'}); assert.equal(calls,previous);
 });
