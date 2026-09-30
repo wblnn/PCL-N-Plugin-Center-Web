@@ -225,7 +225,7 @@ const testEvaluate = (seed: Nameplate): Nameplate => {
     case 'lv_infinity': return { ...seed, owned, parts: [
       { label: '达到 Lv7', done: level >= 7, have: level, need: 7, unit: '级' },
       { label: '通过 ∞ 答题', done: false },
-      { label: 'MC 时长 1000 小时', done: t.gameMinutes >= 60000, have: t.gameMinutes, need: 60000, unit: '分钟' }
+      { label: 'MC 时长 1000 小时', done: t.gameMinutes > 60000, have: t.gameMinutes, need: 60000, unit: '分钟' }
     ] };
     case 'lv_minus_one': return { ...seed, owned, progress: { have: owned ? 1 : 0, need: 1, unit: '项' } };
     case 'lv_mc': return { ...seed, owned, progress: { have: Math.min(t.streakBest, 100), need: 100, unit: '天' } };
