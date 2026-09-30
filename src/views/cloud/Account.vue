@@ -18,8 +18,104 @@
       <p v-if="error" class="form-error" role="alert">{{ error }}</p>
 
       <template v-if="section === 'overview'">
-        <section class="work-panel"><div class="overview-hero"><span class="overview-avatar" aria-hidden="true">{{ (session.name || 'N')[0].toUpperCase() }}</span><div><p class="eyebrow">ACCOUNT</p><h1>{{ session.name }}</h1><p class="overview-mail">{{ session.email || '第三方身份账户' }}</p><span class="status-pill">已登录</span></div></div><div class="shortcut-grid"><button v-for="item in navItems.filter(i => i.key !== 'overview')" :key="item.key" type="button" @click="section = item.key"><span class="nav-icon" :style="{ background: item.color }" aria-hidden="true"><KoiIcon :name="item.icon" /></span><span>{{ item.label }}</span></button></div></section>
+        <section class="work-panel"><div class="overview-hero"><span class="overview-avatar" aria-hidden="true">{{ (session.name || 'N')[0].toUpperCase() }}</span><div><p class="eyebrow">ACCOUNT</p><h1>{{ session.name }}</h1><p class="overview-mail">{{ session.email || '第三方身份账户' }}</p><div class="overview-chips"><!-- 佩戴了可代替等级的铭牌时只显示铭牌,否则显示 Lv + 铭牌 --><span v-if="levelInfo && !levelInfo.nameplates.hidesLevel" class="status-pill plate-pill level">Lv{{ levelInfo.level }}</span><span v-if="equippedPlate" class="status-pill plate-pill" :style="{ background: artFor(equippedPlate.id).tint, color: artFor(equippedPlate.id).accent }"><KoiIcon :name="artFor(equippedPlate.id).icon" />{{ equippedPlate.label }}</span><span class="status-pill">已登录</span></div></div></div><div class="shortcut-grid"><button v-for="item in navItems.filter(i => i.key !== 'overview')" :key="item.key" type="button" @click="section = item.key"><span class="nav-icon" :style="{ background: item.color }" aria-hidden="true"><KoiIcon :name="item.icon" /></span><span>{{ item.label }}</span></button></div></section>
         <section class="work-panel"><h2>会话</h2><p>登录状态 24 小时有效。</p><button class="danger-button" :disabled="busy" @click="logout">退出登录</button></section>
+      </template>
+
+      <template v-else-if="section === 'level'">
+        <!-- 等级与当前展示 -->
+        <section class="work-panel">
+          <div class="section-heading">
+            <div><p class="eyebrow">LEVEL</p><h2>等级与经验</h2></div>
+            <button class="secondary-button" :disabled="levelLoading" @click="loadLevel">刷新</button>
+          </div>
+          <p v-if="levelLoading && !levelInfo">正在读取…</p>
+          <template v-else-if="levelInfo">
+            <div class="level-hero">
+              <!-- 佩戴了 replacesLevel 铭牌时,只显示铭牌、隐藏 Lv 数字 -->
+              <span v-if="levelInfo.nameplates.hidesLevel && equippedPlate" class="level-badge plate" :style="{ background: artFor(equippedPlate.id).tint, color: artFor(equippedPlate.id).accent }">
+                <KoiIcon :name="artFor(equippedPlate.id).icon" />{{ equippedPlate.label }}
+              </span>
+              <span v-else class="level-badge">Lv{{ levelInfo.level }}</span>
+              <div class="level-hero-meta">
+                <p class="level-xp"><strong>{{ formatCount(levelInfo.xp) }}</strong> XP<span v-if="levelInfo.nameplates.bonus > 1"> · 铭牌加成 ×{{ levelInfo.nameplates.bonus.toFixed(2) }}</span></p>
+                <p v-if="levelInfo.next" class="level-next">距 Lv{{ levelInfo.next.level }} 还需 {{ formatCount(levelInfo.next.remaining) }} XP</p>
+                <p v-else class="level-next">已达到最高等级 Lv{{ levelInfo.maxLevel }}</p>
+                <div class="level-track"><i :style="{ width: levelProgress + '%' }"></i></div>
+              </div>
+            </div>
+            <div class="level-stats">
+              <div><b>{{ levelInfo.streak }}</b><span>当前连续启动</span></div>
+              <div><b>{{ levelInfo.streakBest }}</b><span>最长连续启动（天）</span></div>
+              <div><b>{{ formatMinutes(levelInfo.gameMinutes) }}</b><span>Minecraft 累计时长</span></div>
+              <div><b>{{ formatMinutes(levelInfo.launcherMinutes) }}</b><span>Nexa 在线累计</span></div>
+            </div>
+            <p v-if="!levelInfo.launched" class="form-error" role="status">尚未启动过游戏：启动一次 Minecraft 即可从 Lv0 升到 Lv1。</p>
+            <p v-if="levelMsg" class="form-success" role="status">{{ levelMsg }}</p>
+            <p v-if="levelError" class="form-error" role="alert">{{ levelError }}</p>
+          </template>
+        </section>
+
+        <!-- 经验来源 -->
+        <section v-if="levelInfo" class="work-panel">
+          <h2>怎么加经验</h2>
+          <p>经验全部由<strong>启动器上报</strong>，数值由服务端决定。每日上限 {{ levelInfo.dailyCap }} XP{{ dailyXpToday ? `，今日已领取 ${dailyXpToday} 项定额经验。` : '。' }}</p>
+          <div class="source-list">
+            <div v-for="source in levelInfo.xpSources" :key="source.type" class="source-item">
+              <span class="source-icon" aria-hidden="true"><KoiIcon :name="sourceIcon(source.type)" /></span>
+              <div class="source-meta">
+                <h3>{{ source.label }}</h3>
+                <small>{{ sourceValue(source) }} · {{ sourceClaimText(source) }}</small>
+              </div>
+              <span v-if="source.mode === 'daily'" class="status-pill" :class="{ claimed: source.claimedToday }">{{ source.claimedToday ? '已领取' : '待领取' }}</span>
+              <span v-else-if="source.mode === 'once'" class="status-pill" :class="{ claimed: Boolean(levelInfo.firstLaunchAt) }">{{ levelInfo.firstLaunchAt ? '已完成' : '未完成' }}</span>
+              <span v-else class="status-pill">{{ source.dailyCap }} XP/日</span>
+            </div>
+          </div>
+          <p class="source-hint">完整规则、日上限与等级阈值见 <router-link to="/nameplates">铭牌墙</router-link>。</p>
+        </section>
+
+        <!-- 我的铭牌 -->
+        <section v-if="levelInfo" class="work-panel">
+          <div class="section-heading">
+            <div><h2>我的铭牌</h2></div>
+            <router-link class="secondary-button" to="/nameplates">查看全部规则</router-link>
+          </div>
+          <p>已获得 {{ ownedPlateCount }} / {{ myPlates.length }} 枚。{{ levelInfo.nameplates.bonus > 1 ? `当前生效加成 ×${levelInfo.nameplates.bonus.toFixed(2)}` : '暂无经验加成' }}（{{ levelInfo.nameplates.bonusStacking ? '多枚铭牌加成相乘叠加' : '多枚铭牌不叠加，取最高' }}）。</p>
+          <template v-for="group in plateGroups" :key="group.kind">
+            <h3 class="plate-group-title">{{ group.title }}</h3>
+            <div class="my-plate-grid">
+              <article v-for="plate in group.plates" :key="plate.id" class="my-plate" :class="{ owned: plate.owned }">
+                <span class="plate-art" :style="{ background: artFor(plate.id).tint, color: artFor(plate.id).accent }" aria-hidden="true"><KoiIcon :name="artFor(plate.id).icon" /></span>
+                <div class="plate-info">
+                  <div class="plate-line">
+                    <h4>{{ plate.label }}</h4>
+                    <span class="plate-bonus-tag" :style="{ color: artFor(plate.id).accent }">{{ bonusLabel(plate.xpBonus) }}</span>
+                  </div>
+                  <p v-if="plate.replacesLevel" class="plate-replace">可代替等级</p>
+                  <p class="plate-req">{{ plate.requirement }}</p>
+                  <template v-if="!plate.owned">
+                    <ul v-if="plate.parts" class="plate-parts">
+                      <li v-for="part in plate.parts" :key="part.label" :class="{ done: part.done }">
+                        <span>{{ part.label }}</span><b v-if="part.need">{{ formatCount(part.have ?? 0) }}/{{ formatCount(part.need) }}</b>
+                      </li>
+                    </ul>
+                    <template v-else-if="plate.progress">
+                      <div class="plate-track"><i :style="{ width: platePercent(plate.progress) + '%' }"></i></div>
+                      <small>{{ plateProgressText(plate.progress) }}</small>
+                    </template>
+                  </template>
+                </div>
+                <div class="plate-actions">
+                  <button v-if="plate.owned && levelInfo.nameplates.equipped !== plate.id" class="secondary-button" :disabled="plateBusy !== null" @click="equipPlate(plate)">佩戴</button>
+                  <button v-else-if="plate.owned" class="primary-button" :disabled="plateBusy !== null" @click="equipPlate(null)">卸下</button>
+                  <span v-else class="status-pill locked">未达成</span>
+                </div>
+              </article>
+            </div>
+          </template>
+          <p class="source-hint">「b站来的」「小黄标」「我喜欢你」需人工核验：提交证明后由运营写入，随后在此自动出现。</p>
+        </section>
       </template>
 
       <template v-else-if="section === 'linked'">
@@ -168,7 +264,8 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { platform, ApiError, isTestSession, SESSION_EVENT, type Session, type Ticket, type LinkedIdentity, type PolicyStatus, type DeletionRequest, type PrivacyRequest, type Entitlements, type MfaFactors, type MinecraftProfile } from '@/api/platform';
+import { platform, ApiError, isTestSession, SESSION_EVENT, type Session, type Ticket, type LinkedIdentity, type PolicyStatus, type DeletionRequest, type PrivacyRequest, type Entitlements, type MfaFactors, type MinecraftProfile, type AccountLevel, type Nameplate, type PlateProgress, type XpSource } from '@/api/platform';
+import { PLATE_GROUPS, artFor, bonusLabel, formatCount, formatMinutes, type PlateKind } from '@/config/nameplates';
 import { pluginCenterApi } from '@/api/pluginCenter';
 import { createPasskey } from '@/utils/webauthnClient';
 import SegmentedCode from '@/components/SegmentedCode.vue';
@@ -186,6 +283,7 @@ function gotoLogin() { void router.replace({ path: '/login', query: { return: ro
 
 const navItems = [
   { key: 'overview', label: '概览', icon: 'home', color: '#1a73e8' },
+  { key: 'level', label: '等级与铭牌', icon: 'ranking', color: '#7b3ff2' },
   { key: 'linked', label: '关联的账号', icon: 'arrow-left-right', color: '#1e8e3e' },
   { key: 'security', label: '安全性与登录', icon: 'shield-tick', color: '#f2a100' },
   { key: 'profile', label: '个人信息', icon: 'personal-card', color: '#9334e6' },
@@ -201,6 +299,7 @@ const section = ref(validSections.includes(String(route.query.section)) ? String
 watch(() => route.query.section, value => { if (validSections.includes(String(value))) section.value = String(value); });
 watch(section, value => {
   if (value === 'tickets' && !ticketsLoaded.value) void loadTickets();
+  if (value === 'level' && !levelInfo.value && !levelLoading.value) void loadLevel();
   if (value === 'privacy') { void loadPolicies(); void loadPrivacy(); }
   if (value === 'delete') void loadDeletion();
   if (value === 'wallet') void loadEntitlements();
@@ -286,6 +385,68 @@ const offset = ref(0), total = ref(0);
 const visibleTickets = computed(() => tickets.value.filter(t => showResolved.value ? t.status === 'resolved' : t.status === 'open'));
 async function loadTickets(){ busy.value = true; error.value = ''; try { const result = await platform.tickets('console', offset.value); tickets.value = result.data; total.value = result.pagination.total; ticketsLoaded.value = true; } catch (e) { error.value = e instanceof Error ? e.message : '操作失败，请重试。'; } finally { busy.value = false; } }
 async function submit(){ busy.value = true; error.value = ''; message.value = ''; try { await platform.createTicket(subject.value, body.value); subject.value = ''; body.value = ''; message.value = '请求已提交。'; showResolved.value = false; await loadTickets(); } catch (e) { error.value = e instanceof Error ? e.message : '操作失败，请重试。'; } finally { busy.value = false; } }
+
+// ---- 等级 / 经验 / 铭牌墙 ----
+// 数据源:nexa-auth 的 GET /auth/v1/account/level(已含铭牌评估、生效加成与佩戴状态)。
+const levelInfo = ref<AccountLevel | null>(null), levelLoading = ref(false), levelError = ref(''), levelMsg = ref('');
+const plateBusy = ref<string | null>(null);
+async function loadLevel() {
+  levelLoading.value = true; levelError.value = '';
+  try { levelInfo.value = await platform.accountLevel(); }
+  catch (e) { levelError.value = e instanceof Error ? e.message : '暂时无法读取等级与经验。'; }
+  finally { levelLoading.value = false; }
+}
+// 佩戴 / 卸下铭牌。卸下传 null,恢复显示等级数字。
+async function equipPlate(plate: Nameplate | null) {
+  plateBusy.value = plate?.id ?? 'none'; levelMsg.value = ''; levelError.value = '';
+  try {
+    await platform.equipNameplate(plate?.id ?? null);
+    levelMsg.value = plate ? `已佩戴「${plate.label}」。${plate.replacesLevel ? '等级数字已隐藏。' : ''}` : '已卸下铭牌，恢复显示等级。';
+    await loadLevel();
+  } catch (e) { levelError.value = e instanceof Error ? e.message : '佩戴铭牌失败，请重试。'; }
+  finally { plateBusy.value = null; }
+}
+const myPlates = computed(() => levelInfo.value?.nameplates.plates ?? []);
+const plateGroups = computed(() => PLATE_GROUPS
+  .map(group => ({ ...group, plates: myPlates.value.filter(p => p.kind === (group.kind as PlateKind)) }))
+  .filter(group => group.plates.length));
+const ownedPlateCount = computed(() => myPlates.value.filter(p => p.owned).length);
+const equippedPlate = computed(() => myPlates.value.find(p => p.id === levelInfo.value?.nameplates.equipped) ?? null);
+// 等级进度:已达 Lv7 时进度条走满且不再显示"距下一级还需"。
+const levelProgress = computed(() => {
+  const info = levelInfo.value;
+  if (!info) return 0;
+  if (!info.next) return 100;
+  const floor = info.level >= 2 ? (info.thresholds[info.level] ?? 0) : 0;
+  const span = Math.max(1, info.next.threshold - floor);
+  return Math.max(0, Math.min(100, Math.round(((info.xp - floor) / span) * 100)));
+});
+const dailyXpToday = computed(() => {
+  // 今日已入账的经验:由当日已领取的定额来源 + 时长来源的当日累计推算不可得(后端只回传 claimedToday),
+  // 因此这里只展示"今天还能领哪些",不伪造一个总额。
+  const sources = levelInfo.value?.xpSources ?? [];
+  return sources.filter(s => s.mode === 'daily' && s.claimedToday).length;
+});
+const platePercent = (progress: PlateProgress) => progress.need > 0 ? Math.min(100, Math.round((progress.have / progress.need) * 100)) : 0;
+const plateProgressText = (progress: PlateProgress) =>
+  progress.unit === '分钟' ? `${formatMinutes(progress.have)} / ${formatMinutes(progress.need)}`
+  : progress.unit === '粉丝' ? `${formatCount(progress.have)} / ${formatCount(progress.need)}`
+  : `${formatCount(progress.have)} / ${formatCount(progress.need)}${progress.unit ? ' ' + progress.unit : ''}`;
+const sourceValue = (source: XpSource) => source.mode === 'duration' ? `${source.xpPerMinute} XP / 分钟` : `+${source.xp} XP`;
+const sourceClaimText = (source: XpSource) => {
+  if (source.mode === 'once') return levelInfo.value?.firstLaunchAt ? '已完成' : '未完成';
+  if (source.mode === 'daily') return source.claimedToday ? '今日已领取' : '今日未领取';
+  return `单日上限 ${source.dailyCap} XP`;
+};
+// 经验来源图标:全部取自仓库内置的 KOI 图标集,未知类型回退到 activity。
+const SOURCE_ICONS: Record<string, string> = {
+  'daily.login': 'user-square',
+  'daily.launch': 'flash',
+  'game.first_launch': 'video-play',
+  'game.play_minutes': 'timer-pause',
+  'launcher.online_minutes': 'clock'
+};
+const sourceIcon = (type: string) => SOURCE_ICONS[type] ?? 'activity';
 
 // ---- 统一密码验证框架：所有需要密码的操作都经由同一个对话框 ----
 const pwDialog = reactive({ visible: false, mode: 'reauth' as 'reauth' | 'set' | 'change', title: '', description: '', busy: false, error: '' });
@@ -455,6 +616,8 @@ onMounted(async () => {
   nameInput.value = session.value.name ?? '';
   handleInput.value = session.value.handle ?? '';
   if (section.value === 'tickets') void loadTickets();
+  // 等级与铭牌在概览页也要显示徽章,故进入账户页即加载(单个请求)。
+  void loadLevel();
   if (section.value === 'privacy') { void loadPolicies(); void loadPrivacy(); }
   if (section.value === 'delete') void loadDeletion();
   if (section.value === 'wallet') void loadEntitlements();
@@ -464,6 +627,62 @@ onMounted(async () => {
 });
 onUnmounted(() => { window.removeEventListener(SESSION_EVENT, syncSession); });
 </script>
+<style scoped>
+/* ---- 等级与铭牌 ---- */
+.overview-chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.plate-pill{display:inline-flex;align-items:center;gap:5px;font-weight:650}
+.plate-pill :deep(.koi-icon){font-size:12px}
+.plate-pill.level{background:#e9eef6;color:#0d4fa8}
+.level-hero{display:flex;align-items:center;gap:20px;margin:18px 0 4px;flex-wrap:wrap}
+.level-badge{width:76px;height:76px;border-radius:20px;display:grid;place-items:center;font-size:26px;font-weight:700;letter-spacing:-.03em;background:var(--nc-accent);color:#fff;flex-shrink:0}
+.level-badge.plate{font-size:19px;gap:6px;grid-auto-flow:column;padding:0 14px;width:auto;min-width:76px}
+.level-badge.plate :deep(.koi-icon){font-size:22px}
+.level-hero-meta{flex:1;min-width:220px}
+.level-xp{font-size:13px;color:var(--market-muted);margin:0 0 4px}
+.level-xp strong{font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--market-text);font-variant-numeric:tabular-nums;margin-right:4px}
+.level-next{font-size:12px;color:var(--market-muted);margin:0 0 10px}
+.level-track,.plate-track{height:8px;background:var(--market-surface-soft);border:1px solid var(--market-border);border-radius:999px;overflow:hidden}
+.level-track i,.plate-track i{display:block;height:100%;background:var(--nc-accent);border-radius:999px;transition:width .4s ease}
+.level-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0 4px}
+.level-stats>div{background:var(--market-surface-soft);border:1px solid var(--market-border);border-radius:12px;padding:14px 16px}
+.level-stats b{display:block;font-size:19px;font-weight:700;letter-spacing:-.02em;color:var(--nc-accent);line-height:1.2}
+.level-stats span{display:block;font-size:11.5px;color:var(--market-muted);margin-top:5px}
+.source-list{display:grid;gap:2px;margin-top:14px}
+.source-item{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid #e8edf3}
+.source-item:last-child{border-bottom:0}
+.source-icon{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#f1f4f9;color:#3f4f5f;font-size:16px;flex-shrink:0}
+.source-meta{flex:1;min-width:0}
+.source-meta h3{font-size:13px;font-weight:600}
+.source-meta small{display:block;color:#8a99a8;margin-top:3px;font-size:11.5px}
+.status-pill.claimed{background:#e7f6ec;color:#1e8e3e}
+.status-pill.locked{background:var(--market-surface-soft);color:#91a1a9}
+.source-hint{font-size:11.5px;color:#91a1a9;margin:16px 0 0;line-height:1.75}
+.source-hint a{color:var(--nc-accent)}
+.plate-group-title{font-size:12.5px;font-weight:650;margin:24px 0 10px;padding-top:16px;border-top:1px solid #e8edf3;color:var(--market-muted)}
+.my-plate-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.my-plate{display:flex;gap:13px;align-items:flex-start;padding:15px;border:1px solid #e3e8f0;border-radius:12px;background:#fff}
+.my-plate.owned{border-color:var(--nc-accent);box-shadow:0 1px 8px rgba(22,115,230,.09)}
+.my-plate .plate-art{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:19px;flex-shrink:0}
+.plate-info{flex:1;min-width:0}
+.plate-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.plate-line h4{font-size:13.5px;font-weight:650;margin:0}
+.plate-bonus-tag{font-size:11px;font-weight:650;font-variant-numeric:tabular-nums}
+.plate-replace{display:inline-block;font-size:10px;font-weight:650;color:#7b3ff2;background:#f1eafe;border-radius:999px;padding:1px 7px;margin:5px 0 0}
+.plate-info .plate-req{font-size:11.5px;color:var(--market-muted);margin:6px 0 0;line-height:1.6}
+.plate-info .plate-parts{list-style:none;padding:8px 0 0;margin:0;display:grid;gap:4px;font-size:11px;color:#91a1a9}
+.plate-info .plate-parts li{display:flex;justify-content:space-between;gap:10px}
+.plate-info .plate-parts li.done{color:#1e8e3e}
+.plate-info .plate-parts li b{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.plate-info .plate-track{margin-top:9px;height:6px}
+.plate-info small{display:block;font-size:11px;color:#91a1a9;margin-top:5px;font-variant-numeric:tabular-nums}
+.plate-actions{flex-shrink:0;align-self:center}
+.plate-actions .secondary-button,.plate-actions .primary-button{min-height:32px;padding:6px 14px;font-size:11.5px}
+@media(max-width:800px){
+  .level-stats{grid-template-columns:repeat(2,1fr)}
+  .my-plate-grid{grid-template-columns:1fr}
+  .level-badge{width:62px;height:62px;font-size:21px;border-radius:16px}
+}
+</style>
 <style scoped>
 .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 6px}
 .summary-cell{background:var(--market-surface-soft);border:1px solid var(--market-border);border-radius:12px;padding:16px 18px}

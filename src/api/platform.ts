@@ -11,6 +11,43 @@ export interface MfaPasskey { credentialId: string; name: string | null; created
 export interface MfaTotpDevice { id: string; name: string | null; confirmed: boolean; createdAt: string; confirmedAt: string | null }
 export interface MfaFactors { passwordSet: boolean; passkeys: MfaPasskey[]; totp: MfaTotpDevice[]; recovery: { count: number } }
 export interface MinecraftProfile { microsoftLinked: boolean; owned: number | null; profileId: string | null; profileName: string | null; error: string | null; checkedAt: string | null }
+
+// ---------- 等级 / 经验 / 铭牌墙 ----------
+// 规则与阈值的权威定义在后端 nexa-auth(src/nameplates.mjs);这里只做类型声明与展示。
+export type PlateKind = 'subscription' | 'level' | 'badge';
+export interface PlateProgress { have: number; need: number; unit: string | null }
+export interface PlatePart { label: string; done: boolean; have?: number; need?: number; unit?: string }
+export interface Nameplate {
+  id: string; kind: PlateKind; label: string; tier?: string;
+  xpBonus: number; replacesLevel: boolean; requirement: string; detail: string;
+  // 以下字段仅登录后的接口返回;公开目录不含运行时状态。
+  owned?: boolean; progress?: PlateProgress; parts?: PlatePart[];
+}
+export interface XpSource {
+  type: string; label: string; reporter: 'launcher' | 'launcher-or-web';
+  mode: 'daily' | 'duration' | 'once';
+  xp?: number; xpPerMinute?: number; unit?: string; perEventUnitCap?: number;
+  dailyCap: number | null; countsTowardDailyCap: boolean;
+  advancesLaunchStreak?: boolean; unlocksLevelOne?: boolean; claimedToday?: boolean | null;
+}
+export interface NameplateWall {
+  plates: Nameplate[]; levels: Record<string, number>; maxLevel: number;
+  xpSources: XpSource[]; dailyCap: number; bonusStacking: boolean; bonusNote: string;
+}
+export interface LevelNext { level: number; threshold: number; remaining: number }
+export interface MyNameplates { plates: Nameplate[]; bonus: number; equipped: string | null; hidesLevel: boolean; displayLevel: number | null }
+export interface AccountLevel {
+  level: number; xp: number; micro: number; launched: boolean; firstLaunchAt: string | null;
+  next: LevelNext | null; maxLevel: number; dailyCap: number; thresholds: Record<string, number>;
+  lastLoginDay: string | null; lastLaunchDay: string | null;
+  streak: number; streakBest: number; gameMinutes: number; launcherMinutes: number;
+  equippedPlate: string | null;
+  roles: { staff: boolean; developer: boolean; trustedDeveloper: boolean };
+  popularPlugin: { evidence: string | null; setAt: string } | null;
+  xpSources: XpSource[]; nameplates: MyNameplates & { bonusStacking: boolean; equippedPlate: Nameplate | null };
+  requirements: Record<string, { level: number; met: boolean }>;
+  applications: { id: string; kind: string; state: string; note: string | null; created_at: string; reviewed_at: string | null }[];
+}
 export interface StoreItem { id: string; name: string; summary: string; category: string; version: string; publisher: string; description: string }
 export interface Ticket { id: string; subject: string; body: string; status: string; created_at: string; version: number }
 export class ApiError extends Error { constructor(message: string, public status: number) { super(message); } }
@@ -143,6 +180,80 @@ const testPolicyFixtures = (): PolicyStatus[] => {
   ];
 };
 
+// ---------- 铭牌墙 / 经验:仅前端测试账户的本地桩 ----------
+// 规则的权威定义在后端 nexa-auth 的 src/nameplates.mjs,线上由 GET /auth/v1/nameplates 下发。
+// 这里的副本只为 test_login() 在没有认证服务时也能渲染页面;调整铭牌请以后端为准并同步此处。
+const TEST_THRESHOLDS: Record<string, number> = { 2: 2000, 3: 5000, 4: 10000, 5: 20000, 6: 50000, 7: 100000 };
+const TEST_XP_SOURCES: XpSource[] = [
+  { type: 'daily.login', label: '每日登录', reporter: 'launcher-or-web', mode: 'daily', xp: 50, dailyCap: 50, countsTowardDailyCap: true, claimedToday: true },
+  { type: 'daily.launch', label: '每日启动', reporter: 'launcher', mode: 'daily', xp: 30, dailyCap: 30, countsTowardDailyCap: true, advancesLaunchStreak: true, unlocksLevelOne: true, claimedToday: false },
+  { type: 'game.first_launch', label: '首次启动', reporter: 'launcher', mode: 'once', xp: 100, dailyCap: null, countsTowardDailyCap: false, unlocksLevelOne: true },
+  { type: 'game.play_minutes', label: '游戏时长', reporter: 'launcher', mode: 'duration', xpPerMinute: 1, unit: 'minute', perEventUnitCap: 720, dailyCap: 480, countsTowardDailyCap: true },
+  { type: 'launcher.online_minutes', label: 'Nexa 在线时长', reporter: 'launcher', mode: 'duration', xpPerMinute: 0.5, unit: 'minute', perEventUnitCap: 1440, dailyCap: 180, countsTowardDailyCap: true }
+];
+const PLATE_SEEDS: Nameplate[] = [
+  { id: 'sub_lite', kind: 'subscription', label: 'Cloud+ Lite', tier: 'Lite', xpBonus: 1.10, replacesLevel: false, requirement: '订阅 Cloud+ Lite 或更高档位', detail: '入门档铭牌。订阅期间所有经验来源 +10%。' },
+  { id: 'sub_standard', kind: 'subscription', label: 'Cloud+ Standard', tier: 'Standard', xpBonus: 1.25, replacesLevel: false, requirement: '订阅 Cloud+ Standard 或更高档位', detail: '均衡档铭牌。订阅期间所有经验来源 +25%。' },
+  { id: 'sub_advanced', kind: 'subscription', label: 'Cloud+ Advanced', tier: 'Advanced', xpBonus: 1.45, replacesLevel: false, requirement: '订阅 Cloud+ Advanced 或更高档位', detail: '进阶档铭牌。订阅期间所有经验来源 +45%。' },
+  { id: 'sub_ultimate', kind: 'subscription', label: 'Cloud+ Ultimate', tier: 'Ultimate', xpBonus: 1.75, replacesLevel: false, requirement: '订阅 Cloud+ Ultimate 档位', detail: '全量档铭牌。订阅期间所有经验来源 +75%。' },
+  { id: 'lv_infinity', kind: 'level', label: 'Lv∞', xpBonus: 2.00, replacesLevel: true, requirement: '达到 Lv7 + 通过 ∞ 答题 + Minecraft 累计时长超过 1000 小时', detail: '三重门槛的封顶铭牌。三项全部达成后永久保留。' },
+  { id: 'lv_minus_one', kind: 'level', label: 'Lv-1', xpBonus: 1.50, replacesLevel: true, requirement: '成为网站管理员', detail: '站务铭牌。与管理员身份绑定,身份被撤销时一并收回。' },
+  { id: 'lv_mc', kind: 'level', label: 'LvMC', xpBonus: 1.60, replacesLevel: true, requirement: '连续 100 天启动 Minecraft', detail: '恒心铭牌。以历史最长连击为准,断签后不会消失。' },
+  { id: 'from_bilibili', kind: 'badge', label: 'b站来的', xpBonus: 1.05, replacesLevel: false, requirement: '在 Bilibili 达到 Lv6', detail: '需人工核验后由运营写入标记。' },
+  { id: 'yellow_badge', kind: 'badge', label: '小黄标', xpBonus: 1.15, replacesLevel: false, requirement: 'Bilibili 粉丝大于 100 万', detail: '需人工核验后由运营写入标记。' },
+  { id: 'i_like_you', kind: 'badge', label: '我喜欢你', xpBonus: 1.30, replacesLevel: false, requirement: '为 Nexa 无偿捐献 1000+', detail: '无偿捐献(非购买订阅或商品),需人工核验。' }
+];
+// 测试账户的铭牌状态:刻意混合「已拥有 / 差一点 / 完全未达成」,便于预览三种视觉状态。
+const testPlates = {
+  xp: 24680, launched: true, streak: 12, streakBest: 42,
+  gameMinutes: 41230, launcherMinutes: 8600,
+  owned: ['sub_lite', 'sub_standard', 'sub_advanced', 'from_bilibili', 'i_like_you'] as string[],
+  equipped: null as string | null
+};
+const testWall = (): NameplateWall => ({
+  plates: PLATE_SEEDS.map(p => ({ ...p })),
+  levels: { ...TEST_THRESHOLDS }, maxLevel: 7,
+  xpSources: TEST_XP_SOURCES.map(s => ({ ...s })),
+  dailyCap: 700, bonusStacking: false,
+  bonusNote: '多枚铭牌不叠加,取已拥有铭牌中的最高加成'
+});
+// 本地复刻后端的进度派生,让测试账户也能看到进度条与分条件清单。
+const testEvaluate = (seed: Nameplate): Nameplate => {
+  const t = testPlates, owned = t.owned.includes(seed.id);
+  const level = computeTestLevel(t.xp, t.launched);
+  switch (seed.id) {
+    case 'lv_infinity': return { ...seed, owned, parts: [
+      { label: '达到 Lv7', done: level >= 7, have: level, need: 7, unit: '级' },
+      { label: '通过 ∞ 答题', done: false },
+      { label: 'MC 时长 1000 小时', done: t.gameMinutes >= 60000, have: t.gameMinutes, need: 60000, unit: '分钟' }
+    ] };
+    case 'lv_minus_one': return { ...seed, owned, progress: { have: owned ? 1 : 0, need: 1, unit: '项' } };
+    case 'lv_mc': return { ...seed, owned, progress: { have: Math.min(t.streakBest, 100), need: 100, unit: '天' } };
+    case 'from_bilibili': return { ...seed, owned, progress: { have: owned ? 6 : 0, need: 6, unit: '级' } };
+    case 'yellow_badge': return { ...seed, owned, progress: { have: 120000, need: 1000000, unit: '粉丝' } };
+    case 'i_like_you': return { ...seed, owned, progress: { have: owned ? 1000 : 0, need: 1000, unit: '元' } };
+    default: {
+      const rank = ['Lite', 'Standard', 'Advanced', 'Ultimate'].indexOf(seed.tier ?? '') + 1;
+      const have = owned ? rank : Math.max(0, rank - 1);
+      return { ...seed, owned, progress: { have: Math.min(have, rank), need: rank, unit: '档' } };
+    }
+  }
+};
+function computeTestLevel(xp: number, launched: boolean): number {
+  if (!launched) return 0;
+  let level = 1;
+  for (let l = 2; l <= 7; l++) { if (xp >= TEST_THRESHOLDS[l]) level = l; else break; }
+  return level;
+}
+const testMyPlates = (): MyNameplates => {
+  const plates = PLATE_SEEDS.map(testEvaluate);
+  const owned = plates.filter(p => p.owned);
+  const bonus = owned.reduce((max, p) => Math.max(max, p.xpBonus), 1);
+  const equipped = owned.find(p => p.id === testPlates.equipped) ?? null;
+  const level = computeTestLevel(testPlates.xp, testPlates.launched);
+  return { plates, bonus, equipped: equipped?.id ?? null, hidesLevel: Boolean(equipped?.replacesLevel), displayLevel: equipped?.replacesLevel ? null : level };
+};
+
 export const platform = {
   oauthStart: (provider: 'github' | 'microsoft' | 'google', returnTo = '/account', mode: 'login' | 'link' = 'login') => {
     if (isTest()) {
@@ -272,6 +383,51 @@ export const platform = {
   minecraftProfile: async () => {
     if (isTest()) return { microsoftLinked: true, owned: 1, profileId: '8f6a1b2c3d4e5f60718293a4b5c6d7e8', profileName: 'TestPlayer', error: null, checkedAt: testNow() } as MinecraftProfile;
     return authJson<MinecraftProfile>(authFetch('/auth/v1/account/minecraft'), '读取 Minecraft 档案失败');
+  },
+  // ---------- 等级 / 经验 / 铭牌墙 ----------
+  // 公开目录:未登录也可读取,供 /nameplates 铭牌墙页面渲染规则。
+  nameplateWall: async (): Promise<NameplateWall> => {
+    if (isTest()) return testWall();
+    return authJson<NameplateWall>(authFetch('/auth/v1/nameplates'), '暂时无法读取铭牌墙，请稍后重试。');
+  },
+  // 我的铭牌:已拥有清单、未达成进度、生效加成与佩戴状态。
+  myNameplates: async (): Promise<MyNameplates> => {
+    if (isTest()) return testMyPlates();
+    return authJson<MyNameplates>(authFetch('/auth/v1/account/nameplates'), '暂时无法读取我的铭牌。');
+  },
+  // 佩戴 / 卸下铭牌;只有 replacesLevel 的铭牌能隐藏等级数字。传 null 表示只显示等级。
+  equipNameplate: async (plate: string | null): Promise<MyNameplates> => {
+    if (isTest()) {
+      if (plate && !testPlates.owned.includes(plate)) throw new ApiError('尚未达成该铭牌', 403);
+      testPlates.equipped = plate;
+      return testMyPlates();
+    }
+    await authJson<{ ok: boolean; equipped: string | null; hidesLevel: boolean }>(
+      authFetch('/auth/v1/account/nameplates/equip', { method: 'PUT', body: JSON.stringify({ plate }) }), '佩戴铭牌失败');
+    return platform.myNameplates();
+  },
+  // 账户等级总览:等级/经验进度/经验来源今日状态/连击/累计时长/铭牌与加成。
+  accountLevel: async (): Promise<AccountLevel> => {
+    if (isTest()) {
+      const level = computeTestLevel(testPlates.xp, testPlates.launched);
+      const nextLevel = level < 7 ? level + 1 : null;
+      return {
+        level, xp: testPlates.xp, micro: testPlates.xp * 1000, launched: testPlates.launched, firstLaunchAt: testNow(),
+        next: nextLevel ? { level: nextLevel, threshold: TEST_THRESHOLDS[nextLevel], remaining: Math.max(0, TEST_THRESHOLDS[nextLevel] - testPlates.xp) } : null,
+        maxLevel: 7, dailyCap: 700, thresholds: { ...TEST_THRESHOLDS },
+        lastLoginDay: new Date().toISOString().slice(0, 10), lastLaunchDay: null,
+        streak: testPlates.streak, streakBest: testPlates.streakBest,
+        gameMinutes: testPlates.gameMinutes, launcherMinutes: testPlates.launcherMinutes,
+        equippedPlate: testPlates.equipped,
+        roles: { staff: testSession?.staff === 1, developer: testSession?.developer === 1, trustedDeveloper: false },
+        popularPlugin: null,
+        xpSources: TEST_XP_SOURCES.map(s => ({ ...s })),
+        nameplates: { ...testMyPlates(), bonusStacking: false, equippedPlate: PLATE_SEEDS.map(testEvaluate).find(p => p.id === testPlates.equipped) ?? null },
+        requirements: { developer: { level: 2, met: level >= 2 }, trustedDeveloper: { level: 3, met: false }, admin: { level: 4, met: level >= 4 } },
+        applications: []
+      };
+    }
+    return authJson<AccountLevel>(authFetch('/auth/v1/account/level'), '暂时无法读取等级与经验。');
   },
   logout: async () => {
     if (isTest()) { testLogout(); return; }
