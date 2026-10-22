@@ -6,16 +6,16 @@
       <h1 class="hero-anim d2">{{ en ? 'The Minecraft launcher that asks less from you.' : '一个更省心的 Minecraft 启动器。' }}</h1>
       <p class="hero-sub hero-anim d3">{{ en ? 'NexaCL 2.0 — the next generation of PCL N. Instances, Java, accounts, resources and updates: whatever can be automated is automated. You only make the choices that matter.' : 'NexaCL 2.0，PCL N 的下一代。实例、Java、账号、资源和更新，能自动处理的都交给启动器，你只做真正需要选择的事。' }}</p>
       <div class="hero-actions hero-anim d4">
-        <router-link class="hero-btn hero-btn-solid" to="/download">{{ en ? 'Download 2.0 Alpha' : '下载 2.0 Alpha' }} <KoiIcon name="arrow-down" /></router-link>
-        <router-link class="hero-btn hero-btn-ghost" to="/changelog">{{ en ? 'What’s new' : '看看新在哪' }} <KoiIcon name="right" /></router-link>
+        <router-link class="hero-btn hero-btn-solid" to="/download">{{ en ? 'Download 2.0 Alpha' : '下载 2.0 Alpha' }} <span aria-hidden="true">↓</span></router-link>
+        <router-link class="hero-btn hero-btn-ghost" to="/changelog">{{ en ? 'What’s new' : '看看新在哪' }} <span aria-hidden="true">›</span></router-link>
       </div>
       <p class="hero-version hero-anim d5" v-if="latestVersion">{{ en ? 'Current build' : '当前测试版本' }} <code>{{ latestVersion }}</code> · {{ en ? 'Windows / macOS / Linux' : '三大平台 · x64 与 ARM64' }}</p>
       <div class="product-stage hero-anim d6">
         <div class="product-window" role="img" :aria-label="en ? 'Illustration of the NexaCL launcher layout' : 'NexaCL 启动器布局示意'">
           <div class="window-caption"><span><img src="/pcln.png" alt="">NexaCL</span><span class="window-controls" aria-hidden="true">−　□　×</span></div>
-          <div class="window-body"><div class="window-rail" aria-hidden="true"><span class="active"><KoiIcon name="video-play" /></span><span><KoiIcon name="grid-equal" /></span><span><KoiIcon name="folder" /></span><span><KoiIcon name="setting" /></span></div>
+          <div class="window-body"><div class="window-rail" aria-hidden="true"><span class="active">▷</span><span>▧</span><span>▦</span><span>⚙</span></div>
             <div class="window-account"><div class="mock-label">{{ en ? 'Profile' : '档案' }}<span>＋</span></div><div class="player-mark" aria-hidden="true"><span></span><i></i></div><strong>Player</strong><small>{{ en ? 'Offline profile' : '离线档案' }}</small><div class="mock-chip">{{ en ? 'Switch profile' : '切换档案' }}　⌄</div></div>
-            <div class="window-right"><div class="window-version"><div class="mock-label">{{ en ? 'Version' : '版本' }}<span>☷</span></div><div class="version-detail"><div class="grass-block" aria-hidden="true"><KoiIcon name="landscape" /></div><div><strong>1.21.1</strong><small>Minecraft Java Edition</small></div><span>›</span></div><div class="mock-launch">▷　{{ en ? 'Launch game' : '启动游戏' }}</div></div><div class="window-about"><span class="about-mark">N</span><div><strong>NexaCL</strong><p>{{ en ? 'Your next game starts here.' : '下一次游戏，从这里开始。' }}</p></div></div></div>
+            <div class="window-right"><div class="window-version"><div class="mock-label">{{ en ? 'Version' : '版本' }}<span>☷</span></div><div class="version-detail"><div class="grass-block" aria-hidden="true">▧</div><div><strong>1.21.1</strong><small>Minecraft Java Edition</small></div><span>›</span></div><div class="mock-launch">▷　{{ en ? 'Launch game' : '启动游戏' }}</div></div><div class="window-about"><span class="about-mark">N</span><div><strong>NexaCL</strong><p>{{ en ? 'Your next game starts here.' : '下一次游戏，从这里开始。' }}</p></div></div></div>
           </div>
         </div>
         <p class="product-caption">{{ en ? 'Interface illustration. The Alpha interface may change.' : '界面示意。Alpha 版本的界面仍会调整。' }}</p>
@@ -37,25 +37,25 @@
       <div class="section-head center"><p class="eyebrow">{{ en ? 'Why you will like it' : '为什么你会喜欢它' }}</p><h2>{{ en ? 'The chores are ours. The game is yours.' : '把麻烦留给启动器，把游戏留给你。' }}</h2><p>{{ en ? 'Twelve things NexaCL handles for you every day.' : '下面这十二件事，NexaCL 每天都替你处理。' }}</p></div>
       <div class="bento stagger">
         <article class="work-panel tile t-launch">
-          <div class="launch-steps" aria-hidden="true"><span>{{ en ? 'Find instances' : '查找实例' }}</span><i><KoiIcon name="right" /></i><span>{{ en ? 'Pick Java' : '选择 Java' }}</span><i><KoiIcon name="right" /></i><span>{{ en ? 'Prepare assets' : '准备资源' }}</span><i><KoiIcon name="right" /></i><span>{{ en ? 'Watch process' : '记录进程' }}</span></div>
-          <div class="tile-icon"><KoiIcon name="video-play" /></div><h3>{{ en ? 'Launch Minecraft' : '启动 Minecraft' }}</h3>
+          <div class="launch-steps" aria-hidden="true"><span>{{ en ? 'Find instances' : '查找实例' }}</span><i>→</i><span>{{ en ? 'Pick Java' : '选择 Java' }}</span><i>→</i><span>{{ en ? 'Prepare assets' : '准备资源' }}</span><i>→</i><span>{{ en ? 'Watch process' : '记录进程' }}</span></div>
+          <div class="tile-icon">▷</div><h3>{{ en ? 'Launch Minecraft' : '启动 Minecraft' }}</h3>
           <p>{{ en ? 'Pick a profile and a version — the launcher finds local instances, resolves version inheritance, matches the right Java, prepares assets, and keeps watching the process so crashes are traceable.' : '选好档案和版本就好。启动器会找到本地实例、处理版本继承、配好合适的 Java、准备资源依赖，并在游戏运行期间持续记录进程状态，崩溃有迹可循。' }}</p>
         </article>
-        <article class="work-panel tile"><div class="tile-icon"><KoiIcon name="coffee" /></div><h3>{{ en ? 'Java? Handled.' : 'Java？不用你管。' }}</h3><p>{{ en ? 'A built-in runtime catalog covers Java 8 / 17 / 21 / 25, downloaded on demand and matched to each game version. No more hunting for paths.' : '内置 Java 运行时目录，覆盖 8 / 17 / 21 / 25 常见世代，按需自动下载、按游戏版本自动匹配，告别手动找路径。' }}</p></article>
-        <article class="work-panel tile"><div class="tile-icon"><KoiIcon name="arrow-down" /></div><h3>{{ en ? 'Cut off? Keep going.' : '断网了？接着下。' }}</h3><p>{{ en ? 'Interrupted downloads resume, large files arrive in parallel segments, and a failing source is swapped automatically.' : '下载中断可以续传，大文件分段并行，来源失效自动切换，慢网络也能把东西完整拿回来。' }}</p></article>
-        <article class="work-panel tile"><div class="tile-icon"><KoiIcon name="refresh-arrow" /></div><h3>{{ en ? 'Updates, minus the fuss.' : '更新，少折腾。' }}</h3><p>{{ en ? 'It picks a full package or a smaller patch for you, verifies every file before installing, and upgrades 1.4.x straight to 2.0.' : '完整包还是小补丁，它替你决定；每个文件先验证再安装；1.4.x 可以直接升到 2.0。' }}</p></article>
-        <article class="work-panel tile"><div class="tile-icon"><KoiIcon name="profile-circle" /></div><h3>{{ en ? 'Accounts and looks.' : '账号和外观。' }}</h3><p>{{ en ? 'Microsoft, Yggdrasil and LittleSkin sign-in, with skins, capes and the LittleSkin closet filling in. Credentials stay out of public state.' : 'Microsoft、Yggdrasil、LittleSkin 三种登录，皮肤、披风与 LittleSkin 衣柜持续补齐，凭据不进公开状态。' }}</p></article>
+        <article class="work-panel tile"><div class="tile-icon">☕</div><h3>{{ en ? 'Java? Handled.' : 'Java？不用你管。' }}</h3><p>{{ en ? 'A built-in runtime catalog covers Java 8 / 17 / 21 / 25, downloaded on demand and matched to each game version. No more hunting for paths.' : '内置 Java 运行时目录，覆盖 8 / 17 / 21 / 25 常见世代，按需自动下载、按游戏版本自动匹配，告别手动找路径。' }}</p></article>
+        <article class="work-panel tile"><div class="tile-icon">⇩</div><h3>{{ en ? 'Cut off? Keep going.' : '断网了？接着下。' }}</h3><p>{{ en ? 'Interrupted downloads resume, large files arrive in parallel segments, and a failing source is swapped automatically.' : '下载中断可以续传，大文件分段并行，来源失效自动切换，慢网络也能把东西完整拿回来。' }}</p></article>
+        <article class="work-panel tile"><div class="tile-icon">↻</div><h3>{{ en ? 'Updates, minus the fuss.' : '更新，少折腾。' }}</h3><p>{{ en ? 'It picks a full package or a smaller patch for you, verifies every file before installing, and upgrades 1.4.x straight to 2.0.' : '完整包还是小补丁，它替你决定；每个文件先验证再安装；1.4.x 可以直接升到 2.0。' }}</p></article>
+        <article class="work-panel tile"><div class="tile-icon">☺</div><h3>{{ en ? 'Accounts and looks.' : '账号和外观。' }}</h3><p>{{ en ? 'Microsoft, Yggdrasil and LittleSkin sign-in, with skins, capes and the LittleSkin closet filling in. Credentials stay out of public state.' : 'Microsoft、Yggdrasil、LittleSkin 三种登录，皮肤、披风与 LittleSkin 衣柜持续补齐，凭据不进公开状态。' }}</p></article>
         <article class="work-panel tile t-drop">
-          <div class="tile-icon"><KoiIcon name="folder-cloud" /></div><h3>{{ en ? 'Drop it in. Done.' : '拖进来，就能装。' }}</h3>
+          <div class="tile-icon">⤓</div><h3>{{ en ? 'Drop it in. Done.' : '拖进来，就能装。' }}</h3>
           <p>{{ en ? 'Drag files onto the window — imports run as transactions, so a failure changes nothing.' : '把文件拖到窗口上即可安装。导入以事务执行，失败不会留下半成品。' }}</p>
           <div class="chip-row"><span>MRPACK</span><span>CurseForge ZIP</span><span>{{ en ? 'Mod JARs' : '模组 JAR' }}</span><span>Forge / NeoForge / OptiFine</span><span>{{ en ? 'Game folders (inherited import)' : '游戏文件夹（继承导入）' }}</span></div>
         </article>
-        <article class="work-panel tile"><div class="tile-icon"><KoiIcon name="grid-equal" /></div><h3>{{ en ? 'Mods, organized.' : '模组，管得清楚。' }}</h3><p>{{ en ? 'Filter by category, toggle in place, check verified compatible updates, and search resources without leaving the launcher.' : '分类筛选、就地启停、更新前校验兼容性，资源目录直接搜索，不用离开启动器。' }}</p></article>
-        <article class="work-panel tile"><div class="tile-icon"><KoiIcon name="recovery-convert" /></div><h3>{{ en ? 'Broke it? Roll back.' : '装坏了？退回来。' }}</h3><p>{{ en ? 'A successful launch records a baseline snapshot. Review the diff and roll back item by item, or in one click.' : '成功启动即记录基线快照，出问题可查看差异清单，逐条或一键回滚到上次的正常状态。' }}</p></article>
-        <article class="work-panel tile"><div class="tile-icon"><KoiIcon name="task-square" /></div><h3>{{ en ? 'Progress in view.' : '进度，看得见。' }}</h3><p>{{ en ? 'One task center for downloads and installs: stage-by-stage progress, pause and cancel, persisted checkpoints that resume after a restart.' : '下载与安装统一进任务中心：阶段化进度、可暂停可取消，检查点持久化，重启后接着跑。' }}</p></article>
-        <article class="work-panel tile"><div class="tile-icon"><KoiIcon name="gallery-edit" /></div><h3>{{ en ? 'A brand-new interface.' : '全新的界面。' }}</h3><p>{{ en ? 'New window, navigation and launch page, with fluid motion, reduced-motion support and accessibility wired in.' : '新窗口、新导航、新启动页，动效流畅、支持减少动态效果、无障碍已接入。' }}</p></article>
-        <article class="work-panel tile"><div class="tile-icon"><KoiIcon name="lock-circle" /></div><h3>{{ en ? 'Yours stays yours.' : '你的东西是你的。' }}</h3><p>{{ en ? 'Credentials are protected by the system keyring, telemetry is transparent and never collects log bodies, and game data stays local.' : '凭据由系统钥匙串保护，遥测透明、不采集日志正文，游戏数据始终留在本地。' }}</p></article>
-        <article class="work-panel tile"><div class="tile-icon"><KoiIcon name="code-square" /></div><h3>{{ en ? 'Community, open source.' : '社区开发，开源。' }}</h3><p>{{ en ? 'Apache-2.0 licensed and built by the community. Every line is public; feedback lands straight on GitHub.' : 'Apache-2.0 许可，由社区开发。每行代码公开，反馈直达 GitHub。' }}</p><a class="tile-link" :href="NEXA_GITHUB" target="_blank" rel="noreferrer">GitHub ↗</a></article>
+        <article class="work-panel tile"><div class="tile-icon">▦</div><h3>{{ en ? 'Mods, organized.' : '模组，管得清楚。' }}</h3><p>{{ en ? 'Filter by category, toggle in place, check verified compatible updates, and search resources without leaving the launcher.' : '分类筛选、就地启停、更新前校验兼容性，资源目录直接搜索，不用离开启动器。' }}</p></article>
+        <article class="work-panel tile"><div class="tile-icon">↩</div><h3>{{ en ? 'Broke it? Roll back.' : '装坏了？退回来。' }}</h3><p>{{ en ? 'A successful launch records a baseline snapshot. Review the diff and roll back item by item, or in one click.' : '成功启动即记录基线快照，出问题可查看差异清单，逐条或一键回滚到上次的正常状态。' }}</p></article>
+        <article class="work-panel tile"><div class="tile-icon">⧗</div><h3>{{ en ? 'Progress in view.' : '进度，看得见。' }}</h3><p>{{ en ? 'One task center for downloads and installs: stage-by-stage progress, pause and cancel, persisted checkpoints that resume after a restart.' : '下载与安装统一进任务中心：阶段化进度、可暂停可取消，检查点持久化，重启后接着跑。' }}</p></article>
+        <article class="work-panel tile"><div class="tile-icon">✦</div><h3>{{ en ? 'A brand-new interface.' : '全新的界面。' }}</h3><p>{{ en ? 'New window, navigation and launch page, with fluid motion, reduced-motion support and accessibility wired in.' : '新窗口、新导航、新启动页，动效流畅、支持减少动态效果、无障碍已接入。' }}</p></article>
+        <article class="work-panel tile"><div class="tile-icon">🔒</div><h3>{{ en ? 'Yours stays yours.' : '你的东西是你的。' }}</h3><p>{{ en ? 'Credentials are protected by the system keyring, telemetry is transparent and never collects log bodies, and game data stays local.' : '凭据由系统钥匙串保护，遥测透明、不采集日志正文，游戏数据始终留在本地。' }}</p></article>
+        <article class="work-panel tile"><div class="tile-icon">⌘</div><h3>{{ en ? 'Community, open source.' : '社区开发，开源。' }}</h3><p>{{ en ? 'Apache-2.0 licensed and built by the community. Every line is public; feedback lands straight on GitHub.' : 'Apache-2.0 许可，由社区开发。每行代码公开，反馈直达 GitHub。' }}</p><a class="tile-link" :href="NEXA_GITHUB" target="_blank" rel="noreferrer">GitHub ↗</a></article>
       </div>
     </section>
 
@@ -120,7 +120,7 @@
         <h2>{{ en ? 'Ready to meet NexaCL?' : '准备好认识 NexaCL 了吗？' }}</h2>
         <p>{{ en ? 'The Alpha moves fast, and every piece of feedback shapes the next build.' : 'Alpha 正在快速迭代，你的每一条反馈都会影响下一个版本。' }}</p>
         <div class="cta-actions">
-          <router-link class="primary-button hero-cta" to="/download">{{ en ? 'Download NexaCL 2.0 Alpha' : '下载 NexaCL 2.0 Alpha' }} <KoiIcon name="arrow-down" /></router-link>
+          <router-link class="primary-button hero-cta" to="/download">{{ en ? 'Download NexaCL 2.0 Alpha' : '下载 NexaCL 2.0 Alpha' }} <span aria-hidden="true">↓</span></router-link>
           <router-link class="secondary-button hero-cta" to="/download?product=legacy">{{ en ? 'Stay on PCL N 1.4.x' : '继续用 PCL N 1.4.x' }}</router-link>
         </div>
         <p class="cta-fine">{{ en ? 'Built by the community' : '由社区开发' }} · Apache-2.0 · <a :href="NEXA_GITHUB" target="_blank" rel="noreferrer">GitHub ↗</a></p>
@@ -132,7 +132,6 @@
 import { computed, onBeforeUnmount, onMounted, ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { NEXA_GITHUB, loadNexaCatalog } from '@/utils/nexaReleases';
-import KoiIcon from '@/components/KoiIcon.vue';
 import { applyPageSeo } from '@/utils/seo';
 const { locale } = useI18n();
 const en = computed(() => locale.value !== 'zh');
@@ -185,24 +184,24 @@ watchEffect(() => { applyPageSeo({ title: en.value ? 'NexaCL — The Minecraft l
 @keyframes hero-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .hero-anim{animation:hero-rise .6s cubic-bezier(.22,.8,.32,1) both}.hero-anim.d1{animation-delay:.02s}.hero-anim.d2{animation-delay:.08s}.hero-anim.d3{animation-delay:.15s}.hero-anim.d4{animation-delay:.22s}.hero-anim.d5{animation-delay:.29s}.hero-anim.d6{animation-delay:.36s;animation-duration:.8s}
 /* --- hero --- */
-.hero-card{position:relative;overflow:hidden;text-align:center;color:var(--market-text);border-radius:22px;padding:58px 40px 40px;background:var(--market-surface);border:1px solid var(--market-border);box-shadow:0 18px 44px -26px rgba(23,43,77,.22)}
-.hero-card:before{content:'';position:absolute;inset:0;background:radial-gradient(620px 320px at 22% -5%,rgba(91,161,245,.14),transparent 62%);pointer-events:none;animation:hero-sheen 9s ease-in-out infinite alternate}
+.hero-card{position:relative;overflow:hidden;text-align:center;color:#fff;border-radius:22px;padding:58px 40px 40px;background:linear-gradient(135deg,#0d47a1 0%,#1673e6 52%,#4a90ef 100%);box-shadow:0 24px 60px -28px rgba(13,71,161,.5)}
+.hero-card:before{content:'';position:absolute;inset:0;background:radial-gradient(620px 320px at 22% -5%,rgba(255,255,255,.22),transparent 62%);pointer-events:none;animation:hero-sheen 9s ease-in-out infinite alternate}
 @keyframes hero-sheen{from{transform:translateX(-5%)}to{transform:translateX(5%)}}
-.hero-badge{position:relative;display:inline-flex;align-items:center;gap:8px;background:var(--market-accent-soft);border:1px solid #c9ddf8;color:var(--nc-accent);padding:6px 15px;border-radius:999px;font-size:11px;font-weight:650;letter-spacing:.08em}
-.hero-badge i{width:6px;height:6px;border-radius:50%;background:#2fa96b;animation:badge-pulse 2.4s ease-in-out infinite}
+.hero-badge{position:relative;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:6px 15px;border-radius:999px;font-size:11px;font-weight:650;letter-spacing:.08em}
+.hero-badge i{width:6px;height:6px;border-radius:50%;background:#8ff0c0;animation:badge-pulse 2.4s ease-in-out infinite}
 @keyframes badge-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.8)}}
 .hero-card h1{position:relative;font-size:40px;font-weight:700;letter-spacing:-.025em;line-height:1.25;margin:20px auto 0;max-width:720px}
-.hero-sub{position:relative;font-size:14.5px;line-height:1.9;color:var(--market-muted);max-width:620px;margin:16px auto 0}
+.hero-sub{position:relative;font-size:14.5px;line-height:1.9;color:rgba(255,255,255,.88);max-width:620px;margin:16px auto 0}
 .hero-actions{position:relative;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:28px}
 .hero-btn{display:inline-flex;align-items:center;gap:9px;border-radius:999px;padding:12px 26px;font-size:14px;font-weight:600;transition:transform .15s ease,box-shadow .15s ease,background .15s ease}
 .hero-btn:hover{transform:translateY(-1px)}.hero-btn:active{transform:scale(.97)}
-.hero-btn-solid{background:var(--nc-accent);color:#fff;box-shadow:0 10px 26px rgba(22,115,230,.30)}.hero-btn-solid:hover{background:var(--nc-accent-strong);box-shadow:0 14px 32px rgba(22,115,230,.38)}
-.hero-btn-ghost{background:var(--market-surface);border:1px solid #dbe2ee;color:#43536b}.hero-btn-ghost:hover{border-color:var(--nc-accent);color:var(--nc-accent)}
-.hero-version{position:relative;margin:20px 0 0;font-size:12px;color:var(--market-muted)}
-.hero-version code{background:var(--market-surface-soft);border:1px solid var(--market-border);color:var(--nc-accent);padding:2px 10px;border-radius:999px;font-size:11.5px;margin:0 4px}
+.hero-btn-solid{background:#fff;color:#0f5ecb;box-shadow:0 10px 26px rgba(9,45,94,.35)}.hero-btn-solid:hover{box-shadow:0 14px 32px rgba(9,45,94,.45)}
+.hero-btn-ghost{border:1px solid rgba(255,255,255,.55);color:#fff}.hero-btn-ghost:hover{background:rgba(255,255,255,.12)}
+.hero-version{position:relative;margin:20px 0 0;font-size:12px;color:rgba(255,255,255,.78)}
+.hero-version code{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);padding:2px 10px;border-radius:999px;font-size:11.5px;margin:0 4px}
 .product-stage{position:relative;padding:42px 0 6px;margin:auto;max-width:880px}
-.product-window{border-radius:16px;background:#f8faff;border:1px solid #dce7f6;box-shadow:0 30px 55px -30px rgba(48,78,118,.35),0 4px 16px rgba(48,78,118,.10);overflow:hidden;text-align:left;color:#1e3350}
-.window-caption{height:46px;background:var(--nc-accent);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font-size:15px;font-weight:600}
+.product-window{border-radius:16px;background:#f8faff;border:1px solid rgba(255,255,255,.5);box-shadow:0 40px 70px -30px rgba(6,32,66,.65),0 6px 18px rgba(6,32,66,.25);overflow:hidden;text-align:left;color:#1e3350}
+.window-caption{height:46px;background:#0f5ecb;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font-size:15px;font-weight:600}
 .window-caption>span{display:flex;align-items:center;gap:9px}.window-caption img{width:21px;height:21px}.window-controls{font-weight:400;opacity:.85}
 .window-body{display:grid;grid-template-columns:46px .8fr 1.2fr;gap:16px;padding:20px 20px 20px 0;height:330px}
 .window-rail{display:flex;align-items:center;flex-direction:column;gap:22px;color:#5e718a;font-size:20px}.window-rail .active{color:#1673e6}
@@ -219,7 +218,7 @@ watchEffect(() => { applyPageSeo({ title: en.value ? 'NexaCL — The Minecraft l
 .mock-launch{background:#1673e6;border-radius:10px;text-align:center;padding:8px;color:#fff;font-size:14px;animation:launch-pulse 3.2s ease-in-out infinite}
 @keyframes launch-pulse{0%,100%{box-shadow:0 0 0 0 rgba(22,115,230,.35)}55%{box-shadow:0 0 0 7px rgba(22,115,230,0)}}
 .window-about{display:flex;align-items:center;gap:15px;padding:18px}.about-mark{font-size:30px;color:#1673e6;font-weight:650}.window-about p{font-size:12px;color:#748196;margin-top:3px}
-.product-caption{color:var(--market-muted);font-size:11px;margin-top:14px}
+.product-caption{color:rgba(255,255,255,.66);font-size:11px;margin-top:14px}
 /* --- sections --- */
 .home-section{margin-top:56px}.section-head{max-width:660px;margin-bottom:26px}.section-head.center{text-align:center;margin-inline:auto}.section-head h2{font-size:24px;font-weight:700;letter-spacing:-.015em;margin:9px 0 0}.section-head>p:not(.eyebrow){font-size:13.5px;color:var(--market-muted);margin-top:10px;line-height:1.8}.home-section .work-panel{margin:0;transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
 .stats{margin-top:26px}.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);padding:0;border-radius:16px;overflow:hidden;box-shadow:0 12px 32px -18px rgba(23,43,77,.25)}
@@ -228,11 +227,11 @@ watchEffect(() => { applyPageSeo({ title: en.value ? 'NexaCL — The Minecraft l
 .bento{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
 .tile{position:relative;border-radius:16px;padding:22px;display:flex;flex-direction:column}
 .tile:hover{transform:translateY(-3px);border-color:#c9d8ee;box-shadow:0 14px 30px rgba(23,43,77,.10)}
-.tile-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--market-accent-soft);color:var(--nc-accent);font-size:19px;margin-bottom:14px}
+.tile-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--market-accent-soft);color:var(--nc-accent);font-size:17px;margin-bottom:14px}
 .tile h3{font-size:14.5px;font-weight:650}.tile p{font-size:12px;line-height:1.8;color:var(--market-muted);margin-top:8px}
 .tile-link{font-size:12px;color:var(--nc-accent);margin-top:10px}
 .t-launch{grid-column:span 2;grid-row:span 2;justify-content:flex-end;background:linear-gradient(165deg,var(--market-accent-soft),#fff 62%)}
-.t-launch .tile-icon{width:44px;height:44px;font-size:21px}.t-launch h3{font-size:19px}.t-launch p{font-size:13px;max-width:420px}
+.t-launch .tile-icon{width:44px;height:44px;font-size:19px}.t-launch h3{font-size:19px}.t-launch p{font-size:13px;max-width:420px}
 .launch-steps{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:auto;padding:2px 0 26px}
 .launch-steps span{background:#fff;border:1px solid var(--market-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:550;box-shadow:0 1px 2px rgba(23,43,77,.05);animation:step-glow 3.2s ease-in-out infinite}
 .launch-steps span:nth-of-type(2){animation-delay:.4s}.launch-steps span:nth-of-type(3){animation-delay:.8s}.launch-steps span:nth-of-type(4){animation-delay:1.2s}
@@ -285,15 +284,18 @@ watchEffect(() => { applyPageSeo({ title: en.value ? 'NexaCL — The Minecraft l
 .faq-item summary:hover{color:var(--nc-accent)}
 .faq-item p{font-size:12.5px;line-height:1.85;color:var(--market-muted);padding:0 2px 18px;max-width:760px}
 .final-cta{margin-bottom:16px}
-.cta-panel{position:relative;overflow:hidden;text-align:center;border-radius:20px;padding:56px 32px;color:var(--market-text);background:var(--market-surface);border:1px solid var(--market-border);box-shadow:0 16px 40px -24px rgba(23,43,77,.20)}
-.cta-panel:before{content:'';position:absolute;inset:0;background:radial-gradient(560px 280px at 78% 0%,rgba(91,161,245,.12),transparent 60%);pointer-events:none}
-.cta-panel .eyebrow{color:var(--market-muted)}
+.cta-panel{position:relative;overflow:hidden;text-align:center;border-radius:20px;padding:56px 32px;color:#fff;background:linear-gradient(135deg,#0d47a1 0%,#1673e6 55%,#4a90ef 100%);box-shadow:0 20px 50px -24px rgba(13,71,161,.5)}
+.cta-panel:before{content:'';position:absolute;inset:0;background:radial-gradient(560px 280px at 78% 0%,rgba(255,255,255,.2),transparent 60%);pointer-events:none}
+.cta-panel .eyebrow{color:rgba(255,255,255,.75)}
 .cta-panel h2{position:relative;font-size:28px;font-weight:700;letter-spacing:-.02em;margin:10px 0 0}
-.cta-panel>p:not(.eyebrow):not(.cta-fine){position:relative;font-size:13px;color:var(--market-muted);margin-top:12px}
+.cta-panel>p:not(.eyebrow):not(.cta-fine){position:relative;font-size:13px;color:rgba(255,255,255,.85);margin-top:12px}
 .cta-actions{position:relative;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:28px}
 .cta-panel .hero-cta{min-height:44px;padding:12px 28px;font-size:14px}
-.cta-panel .primary-button:hover{box-shadow:0 10px 26px rgba(22,115,230,.30)}
-.cta-fine{position:relative;font-size:11.5px;color:var(--market-muted);margin-top:24px}.cta-fine a{color:var(--nc-accent);text-decoration:underline}
+.cta-panel .primary-button{background:#fff;color:#0f5ecb;border-color:#fff}
+.cta-panel .primary-button:hover{background:#f0f6ff;box-shadow:0 10px 26px rgba(9,45,94,.35)}
+.cta-panel .secondary-button{background:transparent;border-color:rgba(255,255,255,.55);color:#fff}
+.cta-panel .secondary-button:hover{background:rgba(255,255,255,.12);border-color:#fff}
+.cta-fine{position:relative;font-size:11.5px;color:rgba(255,255,255,.72);margin-top:24px}.cta-fine a{color:#fff;text-decoration:underline}
 /* --- tablet / phone --- */
 @media(max-width:800px){
 .hero-card{padding:42px 22px 30px;border-radius:18px}.hero-card h1{font-size:28px}.hero-sub{font-size:13px}
